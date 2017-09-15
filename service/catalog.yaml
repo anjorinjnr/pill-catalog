@@ -1,0 +1,12 @@
+#runtime: python27
+#api_version: 1
+#threadsafe: yes
+#
+#
+#handlers:
+#- url: /v1/*
+#  script: main.catalog_service
+#
+#libraries:
+#- name: webapp2
+#  version: latest
