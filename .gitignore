@@ -1,3 +1,7 @@
 
 .idea/*.xml
 .idea/pill-catalog.iml
+service/lib/*
+service/storage/**
+*.pyc
+service/storage/logs.db-journal
