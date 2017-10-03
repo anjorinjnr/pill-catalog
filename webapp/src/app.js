@@ -6,8 +6,12 @@ import router from './router';
 import store from './store/';
 import $ from 'jquery';
 import select from 'select2';
+import VeeValidate from 'vee-validate';
 
 Vue.use(VueResource);
+Vue.use(VeeValidate);
+
+
 Vue.http.options.root = '/v1/api';
 
 sync(store, router);
@@ -64,6 +68,6 @@ const app = new Vue({
     router,
     store,
     ...App
-})
+});
 
 export { app, router, store }

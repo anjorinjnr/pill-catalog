@@ -1,0 +1,9 @@
+.form-group label {
+    font-weight: bold;
+    color: black;
+    font-size: 13px;
+  }
+
+.form-group.has-danger span {
+    color: red;
+}

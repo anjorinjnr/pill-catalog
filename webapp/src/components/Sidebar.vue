@@ -29,9 +29,9 @@
                         <i class="zmdi zmdi-view-week"></i> Catalog</a>
 
                     <ul>
-                        <li>
-                            <a href="hidden-sidebar.html">Category</a>
-                        </li>
+                        <!--<li>-->
+                            <!--<a href="hidden-sidebar.html">Category</a>-->
+                        <!--</li>-->
                         <router-link tag="li"
                                      active-class="navigation__active"
                                      to="/catalog/drugs">

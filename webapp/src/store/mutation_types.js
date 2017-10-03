@@ -1,2 +1,5 @@
 export const UPDATE_DRUG = 'UPDATE_DRUG';
-export const ADD_DRUG = 'ADD_DRUG';
+export const RECEIVE_DRUGS = 'RECEIVE_DRUGS';
+export const RECEIVE_DRUG = 'RECEIVE_DRUG';
+export const RECEIVE_CATEGORIES = 'RECEIVE_CATEGORIES';
+export const RECEIVE_CATEGORY = 'RECEIVE_CATEGORY';

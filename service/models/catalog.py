@@ -33,7 +33,35 @@ class BaseModel(ndb.Model):
 class DrugCategory(BaseModel):
   """Broad drug categories e.g vitamins, antibiotics etc."""
   name = ndb.StringProperty(required=True)
+  name_lower = ndb.ComputedProperty(lambda self: self.name.lower())
   description = ndb.StringProperty()
+
+  @classmethod
+  def get_by_ids(cls, ids):
+    categories = []
+    if ids:
+      keys = [ndb.Key(DrugCategory, k) for k in ids]
+      categories = cls.query().filter(DrugCategory.key.IN(keys)).fetch(
+        projection=['name', 'description'])
+
+    return categories
+
+  @classmethod
+  def get_all(cls):
+    return cls.query().fetch(projection=['name', 'description'])
+
+  @classmethod
+  def save(cls, data):
+    name = data['name']
+    category = cls.query(DrugCategory.name_lower == name.lower().strip()).get()
+    if not category:
+      category = DrugCategory(name=name.strip())
+      if not_empty(data, 'description'):
+        category.description = data['description']
+      category.put()
+    return category
+
+
 
 
 class Drug(BaseModel):
@@ -46,12 +74,15 @@ class Drug(BaseModel):
 
   name = ndb.StringProperty(required=True)
   unique_id = ndb.StringProperty(required=True)
-  categories = ndb.IntegerProperty(repeated=True)
+  category_ids = ndb.IntegerProperty(repeated=True)
   dosage_form = ndb.StringProperty(choices=DOSAGE_FORMS)
   pack_size = ndb.IntegerProperty()
   strength = ndb.StringProperty()
   active_ingredients = ndb.StringProperty()
   manufacturer = ndb.StringProperty()
+  details = ndb.TextProperty()
+
+  images = ndb.StringProperty(repeated=True)
 
   @classmethod
   def save(cls, data):
@@ -65,7 +96,17 @@ class Drug(BaseModel):
       drug = cls.get_by_id(data['id'])
 
     if not_empty(data, 'categories'):
-      drug.categories = data['categories']
+      category_ids = []
+      for category in data['categories']:
+        if isinstance(category, dict) and 'id' in category:
+          category_ids.append(long(category['id']))
+        elif isinstance(category, long) or isinstance(category, int):
+          category_ids.append(long(category))
+
+      category_keys = [ndb.Key(DrugCategory, i) for i in category_ids]
+      categories = ndb.get_multi(category_keys)
+      categories = [c for c in categories if c is not None]
+      drug.category_ids = [c.key.id() for c in categories]
 
     if not_empty(data, 'dosage_form'):
       drug.dosage_form = data['dosage_form']
@@ -84,6 +125,9 @@ class Drug(BaseModel):
 
     if not_empty(data, 'manufacturer'):
       drug.manufacturer = data['manufacturer']
+    
+    if not_empty(data, 'details'):
+      drug.details = data['details']
 
     drug.put()
     return drug
@@ -113,7 +157,7 @@ class Pharma(BaseModel):
 
 
 class Store(BaseModel):
-  """Represents a physical pharmacy/store where the drugs are fufilled."""
+  """Represents a physical pharmacy/store where the drugs.js are fufilled."""
   store_id = ndb.StringProperty()
   name = ndb.StringProperty()
   email = ndb.StringProperty()

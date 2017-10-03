@@ -2,6 +2,7 @@
 .idea/*.xml
 .idea/pill-catalog.iml
 service/lib/*
-service/storage/**
+service/storage/*
 *.pyc
-service/storage/logs.db-journal
+
+.idea/libraries/Google_App_Engine_SDK.xml
