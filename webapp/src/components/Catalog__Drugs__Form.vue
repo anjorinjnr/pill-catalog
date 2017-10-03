@@ -206,9 +206,14 @@
 
       drugCategories: {
         get: function () {
-          return this.drug.categories.map(category => {
-            return {label: category.name, value: category.id};
-          });
+          if (this.drug && this.drug.categories) {
+            return this.drug.categories.map(category => {
+              return {label: category.name, value: category.id};
+            });
+          } else {
+            return [];
+          }
+
         },
         set: function (value) {
         }
@@ -273,7 +278,6 @@
             .then(data_ => {
               if (data_.id) {
                 alert.notify('Drug saved');
-
                 this.drug = Object.assign({}, this.drug, data_);
                 //upload images
                 this.myDropzone.options.url += `&drug_id=${this.drug.id}`;
@@ -283,12 +287,10 @@
             .catch(error => console.log('error', error));
         };
         this.$validator.validateAll().then(result => {
-          console.log(result);
           if (result) {
             _save();
           } else {
             alert.error('Some fields are invalid, please correct.')
-            console.log('validation failed');
           }
 
         });
@@ -308,7 +310,6 @@
     },
 
     created: function () {
-
       if (this.id) {
         this.getDrugById(this.id).then((drug) => {
           this.drug = drug;
@@ -325,6 +326,4 @@
     color: black;
     font-size: 13px;
   }
-
-
 </style>

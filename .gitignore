@@ -1,6 +1,6 @@
 
-.idea/*
-.idea/pill-catalog.iml
+.idea/**
 service/lib/*
 service/storage/*
 *.pyc
+.vscode/

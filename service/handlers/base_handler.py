@@ -13,6 +13,7 @@ class BaseHandler(webapp2.RequestHandler):
     self.response.headers['Content-Type'] = 'application/json'
     self.response.write(utils.encode_model(obj, **kwargs))
 
+
   def write_response(self, data, status=200):
     self.response.headers['Content-Type'] = 'application/json'
     self.response.out.write(json.dumps(data))

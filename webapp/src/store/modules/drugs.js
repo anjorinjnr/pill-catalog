@@ -20,11 +20,16 @@ const getters = {
 // actions
 const actions = {
 
-  getAllDrugs({commit}) {
+  /**
+   * Get Drugs from server.
+   * @param commit
+   * @returns {Promise}
+   */
+  getDrugs({commit}) {
     return new Promise((resolve, reject) => {
       drugService.getAll()
         .then(drugs => {
-          commit(types.RECEIVE_DRUGS, {drugs});
+          commit(types.RECEIVE_DRUGS, drugs);
           resolve(drugs);
         })
         .catch(error => reject(error));
@@ -32,6 +37,11 @@ const actions = {
 
   },
 
+  /**
+   * Get Drug Categories from sever.
+   * @param commit
+   * @returns {Promise}
+   */
   getCategories({commit}) {
     return new Promise((resolve, reject) => {
       drugService.getCategories()
@@ -45,6 +55,14 @@ const actions = {
 
   },
 
+
+  /**
+   * Create or update Drug Category.
+   * @param commit
+   * @param state
+   * @param payload
+   * @returns {Promise}
+   */
   saveCategory({commit, state}, payload) {
     return new Promise((resolve, reject) => {
       drugService.saveCategory(payload)
@@ -56,20 +74,31 @@ const actions = {
     });
   },
 
-  saveDrug({commit, state}, drug) {
-    return drugService.save(drug)
-      .then(data => {
-        if (data.id) {
-          commit(types.RECEIVE_DRUG, data)
-        }
-        return data;
+  /**
+   * Create or update drug.
+   * @param commit
+   * @param drug
+   * @returns {Promise}
+   */
+  saveDrug({commit}, drug) {
+    return new Promise((resolve, reject) => {
+      drugService.save(drug)
+        .then(data => {
+          commit(types.RECEIVE_DRUG, data);
+          resolve(data);
+        })
+        .catch(error => reject(error));
+    });
 
-      });
   },
 
+  /**
+   * Get a drug by the id. First check local store, then query server.
+   * @param commit
+   * @param id
+   * @returns {Promise}
+   */
   getDrugById({commit}, id) {
-    console.log('id>>', id);
-
     return new Promise((resolve, reject) => {
       let i = state.all.findIndex(d => d.id === id);
       if (i < 0) {
@@ -79,6 +108,8 @@ const actions = {
             resolve(drug);
           })
           .catch(error => reject(error));
+      } else {
+        resolve(state.all[i]);
       }
     });
   }
@@ -87,10 +118,9 @@ const actions = {
 
 
 // mutations
-
 const mutations = {
 
-  [types.RECEIVE_DRUGS](state, {drugs}) {
+  [types.RECEIVE_DRUGS](state, drugs) {
     state.all = drugs;
   },
 
@@ -122,4 +152,4 @@ export default {
   getters,
   actions,
   mutations
-}
+};

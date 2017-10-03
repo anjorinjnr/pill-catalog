@@ -78,7 +78,7 @@ def model_to_dict(o, **kwargs):
       avatar = True
 
 
-    obj = _convert_dict(_secure_user_data(o.to_dict()))
+    obj = _convert_dict(o.to_dict())
     obj['id'] = o.key.id()
     if avatar:
         obj['avatar'] = True
@@ -92,20 +92,11 @@ def model_to_dict(o, **kwargs):
     else:
         return obj
 
-def _secure_user_data(obj):
-    if 'password' in obj:
-        del obj['password']
-    if 'auth_ids' in obj:
-        del obj['auth_ids']
-    return obj
-
-
 def encode_model(o, **kwargs):
     """Encode a model as JSON, adding any additional attributes via kwargs."""
     if isinstance(o, ndb.Model):
         obj = model_to_dict(o, **kwargs)
     elif isinstance(o, list):
-        print 'here'
         obj = []
         for lo in o:
             if isinstance(lo, ndb.Model):

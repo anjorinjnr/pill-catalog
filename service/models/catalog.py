@@ -20,6 +20,8 @@ class BaseModel(ndb.Model):
   deleted_by = ndb.StringProperty()
   deleted = ndb.BooleanProperty()
 
+  _exclude = None
+
   def _pre_put_hook(self):
     """Pre-put operations. Store UTC timestamp(s) in milliseconds."""
     now = int(time.time() * 1000)
@@ -28,6 +30,10 @@ class BaseModel(ndb.Model):
       self.created_at = now
     if self.deleted:
       self.deleted_at = now
+
+  def to_dict(self, include=None, exclude=None):
+    exclude = self._exclude
+    return self._to_dict(include=include, exclude=exclude)
 
 
 class DrugCategory(BaseModel):
@@ -39,10 +45,9 @@ class DrugCategory(BaseModel):
   @classmethod
   def get_by_ids(cls, ids):
     categories = []
-    if ids:
-      keys = [ndb.Key(DrugCategory, k) for k in ids]
-      categories = cls.query().filter(DrugCategory.key.IN(keys)).fetch(
-        projection=['name', 'description'])
+    keys = [ndb.Key(DrugCategory, k) for k in ids]
+    categories = cls.query().filter(DrugCategory.key.IN(keys)).fetch(
+      projection=['name', 'description'])
 
     return categories
 
@@ -62,8 +67,6 @@ class DrugCategory(BaseModel):
     return category
 
 
-
-
 class Drug(BaseModel):
   """Represents a drug without store specific information e.g price."""
   # class constants
@@ -80,9 +83,11 @@ class Drug(BaseModel):
   strength = ndb.StringProperty()
   active_ingredients = ndb.StringProperty()
   manufacturer = ndb.StringProperty()
-  details = ndb.TextProperty()
+  details = ndb.TextProperty(default='')
 
   images = ndb.StringProperty(repeated=True)
+
+  _exclude = ['category_ids']
 
   @classmethod
   def save(cls, data):
@@ -125,12 +130,25 @@ class Drug(BaseModel):
 
     if not_empty(data, 'manufacturer'):
       drug.manufacturer = data['manufacturer']
-    
+
     if not_empty(data, 'details'):
       drug.details = data['details']
 
     drug.put()
     return drug
+
+  @classmethod
+  def get_all(cls):
+
+    @ndb.tasklet
+    def callback(drug):
+      category_keys = [ndb.Key(DrugCategory, c) for c in drug.category_ids]
+      categories = yield DrugCategory.query().filter(
+        DrugCategory.key.IN(category_keys)).fetch_async(
+        projection=['name', 'description'])
+      raise ndb.Return((drug, categories))
+
+    return cls.query().map(callback)
 
 
 class Contact(ndb.Model):
