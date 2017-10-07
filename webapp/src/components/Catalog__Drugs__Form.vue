@@ -31,7 +31,7 @@
               <span v-show="errors.has('unique_id')">Enter drug registration number.</span>
             </div>
 
-            <div class="row">
+            <div class="row new-category">
               <div class="col-sm-6" v-if="addNewCategory">
                 <div class="form-group">
                   <label class="form-control-label">Category</label>
@@ -44,10 +44,11 @@
               <div class="col-sm-6" v-if="addNewCategory">
                 <div class="form-group">
 
-                  <button @click="addCategory" style="margin-top: 30px;"
+                  <button type="button"
+                          @click="addCategory"
                           class="btn btn-success">Save
                   </button>
-                  <button @click="addNewCategory=false" style="margin-top: 30px;"
+                  <button @click="addNewCategory=false"
                           class="btn">Cancel
                   </button>
                 </div>
@@ -154,8 +155,7 @@
 </template>
 
 <script>
-  import Dropzone from 'dropzone';
-  import vSelect from "vue-select";
+  
   import {mapState, mapActions, mapGetters, mapMutations} from 'vuex';
   import {UPDATE_DRUG} from '../store/mutation_types';
   import _ from 'lodash';
@@ -180,8 +180,9 @@
     addNewCategory: false
   };
 
+
   export default {
-    components: {vSelect},
+    components: {'vSelect': () => import('vue-select')},
 
     props: {
       id: Number,
@@ -251,9 +252,7 @@
             this.drug.categories.push(category);
           } else {
             this.saveCategory({name: this.newCategoryName})
-              .then(category => {
-                this.drug.categories.push({label: category.name, value: category.id});
-              })
+              .then(category => this.drug.categories.push(category))
               .catch(error => console.log(error));
           }
         }
@@ -284,7 +283,7 @@
                 this._uploadImages();
               }
             })
-            .catch(error => console.log('error', error));
+            .catch(error => alert.error());
         };
         this.$validator.validateAll().then(result => {
           if (result) {
@@ -299,14 +298,17 @@
     },
 
     mounted: function () {
-      Dropzone.autoDiscover = false;
-      Dropzone.options.dropzoneUpload = {
-        autoProcessQueue: false
-      };
-      this.myDropzone = new Dropzone("form#dropzoneUpload", {url: '/v1/image/upload?type=drug'});
-      this.myDropzone.on('success', () => {
-        this._uploadImages();
+      import('dropzone').then(Dropzone => {
+        Dropzone.autoDiscover = false;
+        Dropzone.options.dropzoneUpload = {
+          autoProcessQueue: false
+        };
+        this.myDropzone = new Dropzone("form#dropzoneUpload", {url: '/v1/image/upload?type=drug'});
+        this.myDropzone.on('success', () => {
+          this._uploadImages();
+        });
       });
+
     },
 
     created: function () {
@@ -325,5 +327,9 @@
     font-weight: bold;
     color: black;
     font-size: 13px;
+  }
+
+  .new-category button {
+    margin-top: 30px;
   }
 </style>
