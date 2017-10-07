@@ -12,11 +12,5 @@ indexes:
 
 - kind: DrugCategory
   properties:
-  - name: __key__
-  - name: description
-  - name: name
-
-- kind: DrugCategory
-  properties:
   - name: description
   - name: name

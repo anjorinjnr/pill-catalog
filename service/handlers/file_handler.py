@@ -53,7 +53,7 @@ class UploadHandler(BaseHandler):
       file_name = self.create_file(image)
       drug.images.append(file_name)
       drug.put()
-      self.write_response({'file_name': file_name});
+      self.write_response({'file_name': file_name})
 
   def create_file(self, file):
     """Create a file."""

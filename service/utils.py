@@ -92,6 +92,7 @@ def model_to_dict(o, **kwargs):
     else:
         return obj
 
+
 def encode_model(o, **kwargs):
     """Encode a model as JSON, adding any additional attributes via kwargs."""
     if isinstance(o, ndb.Model):
