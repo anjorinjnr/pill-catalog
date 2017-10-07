@@ -155,7 +155,7 @@
 </template>
 
 <script>
-  
+
   import {mapState, mapActions, mapGetters, mapMutations} from 'vuex';
   import {UPDATE_DRUG} from '../store/mutation_types';
   import _ from 'lodash';
