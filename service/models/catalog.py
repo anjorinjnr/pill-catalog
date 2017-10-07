@@ -2,7 +2,6 @@ import logging
 import time
 from google.appengine.ext import ndb
 
-
 def not_empty(data, field):
   if field in data and data[field]:
     return True
@@ -45,9 +44,10 @@ class DrugCategory(BaseModel):
   @classmethod
   def get_by_ids(cls, ids):
     categories = []
-    keys = [ndb.Key(DrugCategory, k) for k in ids]
-    categories = cls.query().filter(DrugCategory.key.IN(keys)).fetch(
-      projection=['name', 'description'])
+    if ids:
+      keys = [ndb.Key(DrugCategory, k) for k in ids]
+      categories = cls.query().filter(DrugCategory.key.IN(keys)).fetch(
+        projection=['name', 'description'])
 
     return categories
 
@@ -74,6 +74,8 @@ class Drug(BaseModel):
   DOSAGE_CREAM = 'Cream'
   DOSAGE_INJECTION = 'Injection'
   DOSAGE_FORMS = [DOSAGE_TABLET, DOSAGE_CREAM, DOSAGE_INJECTION]
+
+  PAGE_SIZE = 50
 
   name = ndb.StringProperty(required=True)
   unique_id = ndb.StringProperty(required=True)
@@ -138,17 +140,40 @@ class Drug(BaseModel):
     return drug
 
   @classmethod
-  def get_all(cls):
+  def get_all(cls, offset=0, limit=PAGE_SIZE):
+
+    offset = offset - 1 if offset > 0 else 0
 
     @ndb.tasklet
     def callback(drug):
-      category_keys = [ndb.Key(DrugCategory, c) for c in drug.category_ids]
-      categories = yield DrugCategory.query().filter(
-        DrugCategory.key.IN(category_keys)).fetch_async(
-        projection=['name', 'description'])
+      categories = []
+      if drug.category_ids:
+        category_keys = [ndb.Key(DrugCategory, c) for c in drug.category_ids]
+        categories = yield DrugCategory.query().filter(
+          DrugCategory.key.IN(category_keys)).fetch_async(
+          projection=['name', 'description'])
+
       raise ndb.Return((drug, categories))
 
-    return cls.query().map(callback)
+
+    total_future = cls.query().count_async(keys_only=True)
+    query = cls.query().order(cls.name)
+    data = query.fetch(limit, offset=offset)
+
+    data_with_related = []
+    for d in data:
+      data_with_related.append(callback(d).get_result())
+    total = total_future.get_result()
+
+    return {
+      'data': data_with_related,
+      'page_total': len(data_with_related),
+      'from': offset + 1 if offset < total else None,
+      'to': offset + len(data_with_related) if data_with_related else None,
+      'next': offset + limit + 1 if offset + limit + 1 <= total else None,
+      'total': total,
+      'page_size': limit
+    }
 
 
 class Contact(ndb.Model):

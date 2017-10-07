@@ -1,10 +1,9 @@
 from handlers.base_handler import BaseHandler
-from webapp2 import Route
 import logging
 from validators.drug_validator import DrugValidator, DrugCategoryValidator
 from models import catalog as model
-from google.appengine.ext import ndb
 import utils
+
 
 class CategoryHandler(BaseHandler):
   def get(self):
@@ -24,6 +23,7 @@ class CategoryHandler(BaseHandler):
       self.write_model(category)
 
 
+
 class DrugHandler(BaseHandler):
   def get(self, drug_id=None):
     """Return all drugs or drug with specified id."""
@@ -36,11 +36,19 @@ class DrugHandler(BaseHandler):
         error = {'message': 'Drug with id({}) not found.'.format(drug_id)}
         self.error_response(error)
     else:
-     drugs_with_categories = model.Drug.get_all()
+     offset = self.request.get('offset', default_value=0)
+     try:
+       offset = int(offset)
+     except ValueError:
+       offset = 0
+       logging.error('Invalid offset')
+
+     results = model.Drug.get_all(offset=int(offset))
      data = []
-     for drugs in drugs_with_categories:
+     for drugs in results['data']:
        data.append(utils.model_to_dict(drugs[0], categories=drugs[1]))
-     self.write_model(data)
+     results['data'] = data
+     self.write_model(results)
 
   def post(self):
     """Create or update drug."""
