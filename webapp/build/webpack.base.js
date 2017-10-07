@@ -30,7 +30,7 @@ module.exports = {
     },
     modules: [
       _.cwd('node_modules'),
-      // this meanse you can get rid of dot hell
+      // this means you can get rid of dot hell
       // for example import 'components/Foo' instead of import '../../components/Foo'
       _.cwd('client')
     ]

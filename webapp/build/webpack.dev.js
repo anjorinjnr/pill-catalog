@@ -32,12 +32,10 @@ _.cssProcessors.forEach(processor => {
   } else {
     loaders = ['postcss-loader', processor.loader]
   }
-  base.module.loaders.push(
-    {
-      test: processor.test,
-      loaders: ['style-loader', _.cssLoader].concat(loaders)
-    }
-  )
+  base.module.loaders.push({
+    test: processor.test,
+    loaders: ['style-loader', _.cssLoader].concat(loaders)
+  })
 });
 
 //setup proxy
@@ -46,6 +44,5 @@ base.devServer = {
     '**': proxy ? proxy.url : ''
   }
 };
-console.log(base.devServer);
 
 module.exports = base
