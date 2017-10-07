@@ -5,12 +5,17 @@ import App from './components/App';
 import router from './router';
 import store from './store/';
 import $ from 'jquery';
-import select from 'select2';
+//import select from 'select2';
 import VeeValidate from 'vee-validate';
 
 Vue.use(VueResource);
 Vue.use(VeeValidate);
 
+const APP_VERSION = '0.0.3';
+
+console.info('Running Version: ' + APP_VERSION);
+
+//Vue.http.options.root = 'https://catalog-service-dot-pharmaplusng.appspot.com/v1/api';
 
 Vue.http.options.root = '/v1/api';
 
@@ -28,38 +33,6 @@ Vue.directive('toggle-menu', {
                 'navigation__sub--toggled navigation__sub--active');
 
             //$(e.currentTarget).next('ul').slideToggle(250);
-        });
-    }
-});
-// Vue.directive('dropzone', {
-//     inserted: function(el) {
-//         console.log(el.id);
-//         // new Dropzone(`form#${el.id}`,  {url:  '/file/post'});
-//         //  $(el).dropzone({
-//         //     url: '/file/post',
-//         //     addRemoveLinks: true
-//         // });
-//     }
-// });
-
-Vue.directive('select2', {
-    inserted: function(el) {
-        var select2parent = $('.select2-parent')[0] ? $('.select2-parent') : $('body');
-
-        $(el).select2({
-            dropdownAutoWidth: true,
-            width: '100%',
-            dropdownParent: select2parent
-        });
-
-        $(el).on('change', (val) => {
-            // console.log(val);
-        });
-
-        $(el).on('select2:select', function(e) {
-            console.log(e.params.data.id);
-            $(el).val(e.params.data.id).trigger('change');
-            // Do something
         });
     }
 });

@@ -5,6 +5,7 @@ import notify from 'bootstrap-notify';
 const TYPE_DEFAULT = 'inverse';
 const TYPE_DANGER = 'danger';
 const DELAY = 3000;
+const DEFAULT_ERROR_MSG = 'Something went wrong, please try again.';
 
 const alert = function (message, type) {
   $.notify({message},
@@ -35,7 +36,8 @@ export default {
     alert(message, TYPE_DEFAULT);
   },
 
-  error(message) {
+  error(message=DEFAULT_ERROR_MSG) {
+    console.error(message);
     alert(message, TYPE_DANGER);
   }
 

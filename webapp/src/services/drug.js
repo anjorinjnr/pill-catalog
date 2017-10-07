@@ -26,8 +26,11 @@ export default {
             .catch(error => Promise.reject(error.data));
     },
 
-    getAll() {
-        return Vue.http.get('drugs')
+    getAll(params) {
+        params = params || {};
+
+
+        return Vue.http.get('drugs', {params})
             .then(response => Promise.resolve(response.data))
             .catch(error => Promise.reject(error.data));
     }

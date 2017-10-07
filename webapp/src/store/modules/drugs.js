@@ -3,22 +3,49 @@ import * as types from '../mutation_types';
 
 //initial state
 const state = {
-  all: [],
+  all: {data: []},
   categories: []
 };
 
 // getters
 const getters = {
-  drugs: state => state.all,
+  drugs: state => state.all.data,
+
+  pageInfo: state => {
+    let {to, from, total, next} = state.all;
+    return {to, from, total, next};
+  },
 
   drugById: (state) => (id) => {
-    return state.all.find(drug => drug.id === id);
+    return state.all.data.find(drug => drug.id === id);
   }
 };
 
 
 // actions
 const actions = {
+  _loadDrugs(commit, params) {
+    return new Promise((resolve, reject) => {
+      drugService.getAll(params)
+        .then(drugs => {
+          commit(types.RECEIVE_DRUGS, drugs);
+          resolve(drugs);
+        })
+        .catch(error => reject(error));
+    });
+  },
+
+  getNextPage({commit, state}) {
+    let params = {offset: state.all.next};
+    return actions._loadDrugs(commit, params);
+
+
+  },
+
+  getPrevPage({commit, state}) {
+    let params = {offset: state.all.from - state.all.page_size};
+    return actions._loadDrugs(commit, params);
+  },
 
   /**
    * Get Drugs from server.
@@ -26,15 +53,7 @@ const actions = {
    * @returns {Promise}
    */
   getDrugs({commit}) {
-    return new Promise((resolve, reject) => {
-      drugService.getAll()
-        .then(drugs => {
-          commit(types.RECEIVE_DRUGS, drugs);
-          resolve(drugs);
-        })
-        .catch(error => reject(error));
-    });
-
+    return actions._loadDrugs(commit);
   },
 
   /**
@@ -59,11 +78,11 @@ const actions = {
   /**
    * Create or update Drug Category.
    * @param commit
-   * @param state
    * @param payload
    * @returns {Promise}
    */
-  saveCategory({commit, state}, payload) {
+  saveCategory({commit}, payload) {
+    console.log('category', payload);
     return new Promise((resolve, reject) => {
       drugService.saveCategory(payload)
         .then(category => {
@@ -99,8 +118,9 @@ const actions = {
    * @returns {Promise}
    */
   getDrugById({commit}, id) {
+    console.log('id', id);
     return new Promise((resolve, reject) => {
-      let i = state.all.findIndex(d => d.id === id);
+      let i = state.all.data.findIndex(d => d.id === id);
       if (i < 0) {
         drugService.getById(id)
           .then(drug => {
@@ -109,7 +129,7 @@ const actions = {
           })
           .catch(error => reject(error));
       } else {
-        resolve(state.all[i]);
+        resolve(state.all.data[i]);
       }
     });
   }

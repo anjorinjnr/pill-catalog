@@ -10,7 +10,8 @@ export default new Router({
   mode: 'hash',
   routes: [{
     path: '/',
-    component: Home
+    redirect: '/catalog/drugs'
+    //component: Home
   },
     {
       path: '/catalog/drugs',
